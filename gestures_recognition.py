@@ -125,15 +125,12 @@ def Gestures_Detect(hand,sample_list):
         ndefects=11  #返回contours为空的信息，只作调试用
         center=tuple([a//2 for a in reversed(hand.shape)])  #返回图像的中心坐标
         return hand,ndefects,center
-    '''
-    black = np.ones(hand.shape, np.uint8) #创建黑色幕布
-    cv2.drawContours(black,large_cout,-1,(255,255,255),3) #绘制白色轮廓
-    cv2.imshow('fourier',black)
+    
     '''
     black2 = np.ones(hand.shape, np.uint8) #创建黑色幕布
     cv2.drawContours(black2,large_cout,-1,(255,255,255),3) #绘制白色轮廓
     cv2.imshow('large_cout',black2)
-    
+    '''
     hull=cv2.convexHull(large_cout,returnPoints=False)
     defects=cv2.convexityDefects(large_cout,hull)
     _,radius=cv2.minEnclosingCircle(large_cout)
