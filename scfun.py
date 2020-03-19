@@ -26,8 +26,8 @@ def Fourier_Descriptor_Similarity(A,B):
 
 #归一化函数
 def Normalization(data):
-    _range = np.max(data) - np.min(data)
-    return (data - np.min(data)) / _range
+    _range = abs(np.max(data))
+    return data / _range
 
 #计算方位角
 #value为输出入的坐标，origin为原点坐标，默认为(0,0)
