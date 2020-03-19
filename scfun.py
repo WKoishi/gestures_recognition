@@ -51,13 +51,16 @@ def Fourier_Descriptor(contour):
     contours_complex.imag = contour[:,1]  #纵坐标作为虚数部分
     fourier_result = np.fft.fft(contours_complex)  #进行傅里叶变换
 
-    #截短傅里叶描述子
-    descriptors = np.fft.fftshift(fourier_result)
-    #取中间的MIN_DESCRIPTOR项描述子
-    center_index = int(len(descriptors) / 2)
-    low, high = center_index - int(MIN_DESCRIPTOR / 2), center_index + int(MIN_DESCRIPTOR / 2)
-    descriptors = descriptors[low:high]
-    descriptors = np.fft.ifftshift(descriptors)
+    if len(fourier_result)>MIN_DESCRIPTOR:
+        #截短傅里叶描述子
+        descriptors = np.fft.fftshift(fourier_result)
+        #取中间的MIN_DESCRIPTOR项描述子
+        center_index = int(len(descriptors) / 2)
+        low, high = center_index - int(MIN_DESCRIPTOR / 2), center_index + int(MIN_DESCRIPTOR / 2)
+        descriptors = descriptors[low:high]
+        descriptors = np.fft.ifftshift(descriptors)
+    else:
+        return fourier_result
 
     return descriptors
 
