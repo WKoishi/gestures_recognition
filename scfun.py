@@ -4,7 +4,7 @@ from math import sqrt,atan2,pi,exp
 import numpy as np
 
 #生成的傅里叶描述子个数
-MIN_DESCRIPTOR = 36
+MIN_DESCRIPTOR = 32
 
 #一阶低通滤波器
 def Filter(val,last_val,rate):
