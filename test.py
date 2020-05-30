@@ -2,13 +2,21 @@ import numpy as np
 from cv2 import cv2
 from matplotlib import pyplot as plt
 from math import sqrt,atan2,pi,exp
-from time import clock
+from time import perf_counter
 from collections import Counter
-from fourierDescriptor import fourierDesciptor,reconstruct
 from scipy import fftpack
 
 def Eucledian_Distance(x,y):
     return sqrt(sum([(a-b)**2 for a,b in zip(x,y)]))
+
+def Eucledian_Distance_Mat(x,y):
+    if x.shape==y.shape:
+        return np.sqrt(np.dot(x,x)-2*np.dot(x,y)+np.dot(y,y))
+    else:
+        return 0XFF
+
+def ED_test(x,y):
+    return np.linalg.norm(x - y)
 
 def Manhattan_Distance(x,y):
     return sum([abs(a-b) for a,b in zip(x,y)])
@@ -44,6 +52,11 @@ def Avg_Filter(new,buf,length):
     buf[min_id]=0
     return sum(buf)/(length-2)
 
+#归一化函数
+def Normalization(data):
+    _range = abs(np.max(data))
+    return data / _range
+
 #计算方位角
 #value为输入的坐标，origin为原点坐标，默认为(0,0)
 #输出的角度以原点水平向右为x轴，逆时针为正，顺时针为负
@@ -59,6 +72,37 @@ def Softmax(ls):
 def test(ls):
     return np.exp(ls)/np.sum(np.exp(ls))
 
+def OTSU(img,sta,fin):
+
+    hist = cv2.calcHist([img],[0],None,[fin-sta],[sta,fin])
+    hist_norm = hist.ravel()/hist.max()
+    Q = hist_norm.cumsum()
+
+    bins = np.arange(fin-sta)
+
+    fn_min = np.inf
+    thresh = -1
+
+    for i in range(1,fin-sta):
+        p1,p2 = np.hsplit(hist_norm,[i]) # probabilities
+        q1,q2 = Q[i],Q[fin-sta-1]-Q[i] # cum sum of classes
+        b1,b2 = np.hsplit(bins,[i]) # weights
+
+        # finding means and variances
+        m1,m2 = np.sum(p1*b1)/q1, np.sum(p2*b2)/q2
+        v1,v2 = np.sum(((b1-m1)**2)*p1)/q1,np.sum(((b2-m2)**2)*p2)/q2
+
+        # calculates the minimization function
+        fn = v1*q1 + v2*q2
+        if fn < fn_min:
+            fn_min = fn
+            thresh = i
+    thresh+=(sta-1)
+
+    return thresh
+
+
+
 '''
 start=clock()
 hi=Ges_Num_Detect(13,ls,30)
@@ -70,7 +114,7 @@ ji=Test(13,ls,30)
 finish=clock()
 print(ji,finish-start)
 '''
-
+'''
 def deskew(img,shape):
     SZ=int((shape[0]+shape[1])/2)
     m = cv2.moments(img)
@@ -81,24 +125,70 @@ def deskew(img,shape):
     img = cv2.warpAffine(img,M,(SZ, SZ),flags=cv2.WARP_INVERSE_MAP|cv2.INTER_LINEAR)
     return img
 
-ls=np.zeros((2500,2),dtype=np.float64)
-for i,_ in enumerate(ls):
-    for j,_ in enumerate(ls[i]):
-        ls[i,j]=5*sqrt(i)-80*j
+ls=[4,6,3,11,0.5,0.7,22,34,12,7,8,10]
+index=[3,6,15]
+avg=sum(index)/len(index)
+print(avg)
+'''
 
-df=[]
-for i in range(10):
-    df.append(i+1)
+'''
+sta=clock()
+for _ in range(5):
+    dqx=Eucledian_Distance_Mat(A,B)
+fin=clock()
+print(dqx)
+print(fin-sta)
+'''
 
-contours_complex = np.empty(ls.shape[:-1], dtype=complex)
-contours_complex.real = ls[:,0]  #横坐标作为实数部分
-contours_complex.imag = ls[:,1]  #纵坐标作为虚数部分
+cap=cv2.VideoCapture(0)
 
-start=clock()
-wcxe=np.ones((11,11),dtype=np.uint8)
+while(1):
 
-finish=clock()
-print(finish-start)
+    _,img=cap.read()
+    
+    img=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(img,(5,5),0)
+    '''
+    hist = cv2.calcHist([blur],[0],None,[256],[0,256])
+    hist_norm = hist.ravel()/hist.max()
+    Q = hist_norm.cumsum()
+
+    bins = np.arange(256)
+
+    fn_min = np.inf
+    thresh = -1
+
+    for i in range(1,256):
+        p1,p2 = np.hsplit(hist_norm,[i]) # probabilities
+        q1,q2 = Q[i],Q[255]-Q[i] # cum sum of classes
+        b1,b2 = np.hsplit(bins,[i]) # weights
+
+        # finding means and variances
+        m1,m2 = np.sum(p1*b1)/q1, np.sum(p2*b2)/q2
+        v1,v2 = np.sum(((b1-m1)**2)*p1)/q1,np.sum(((b2-m2)**2)*p2)/q2
+
+        # calculates the minimization function
+        fn = v1*q1 + v2*q2
+        if fn < fn_min:
+            fn_min = fn
+            thresh = i
+    '''
+    # find otsu's threshold value with OpenCV function
+    ret, otsu = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    
+    print(fin-sta)
+
+    cv2.imshow('cxw',img)
+
+    key=cv2.waitKey(2)&0XFF
+    if key==27:
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+
+
+
 
 
 
